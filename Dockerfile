@@ -1,5 +1,6 @@
 FROM debian:stretch-slim
-MAINTAINER Mattias Wadman mattias.wadman@gmail.com
+MAINTAINER Grzegorz Szczudlik szczad@gmail.com, Mattias Wadman mattias.wadman@gmail.com
+LABEL authors="Grzegorz Szczudlik szczad@gmail.com, Mattias Wadman mattias.wadman@gmail.com"
 RUN \
   apt-get update && \
   apt-get -y --no-install-recommends install \
@@ -7,8 +8,10 @@ RUN \
     libsasl2-modules \
     opendkim \
     opendkim-tools \
-    rsyslog && \
+    rsyslog \
+    procps && \
   apt-get clean && \
+  mkdir -p /etc/opendkim/keys && \
   rm -rf /var/lib/apt/lists/*
 # Default config:
 # Open relay, trust docker links for firewalling.
@@ -22,8 +25,7 @@ ENV \
   POSTFIX_smtpd_tls_security_level=none
 COPY rsyslog.conf /etc/rsyslog.conf
 COPY opendkim.conf /etc/opendkim.conf
-RUN mkdir -p /etc/opendkim/keys
-COPY run /root/
+COPY run /usr/local/bin/postfix-run
 VOLUME ["/var/lib/postfix", "/var/mail", "/var/spool/postfix", "/etc/opendkim/keys"]
 EXPOSE 25
-CMD ["/root/run"]
+CMD ["/usr/local/bin/postfix-run"]
